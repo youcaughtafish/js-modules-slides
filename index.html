@@ -70,13 +70,15 @@ function dylanChillingAndGrilling() {
 	chillingAndGrilling();
 }
 ```
-* related functionality problem: which code is needed for a specific piece of functionality
-* namespace problem: what's the interface? can I call anything I want and in any order?
-* dependency problem: are there external dependencies required for this code I need to include?
+* **related functionality problem**: which code is needed for a specific piece of functionality
+* **namespace problem**: what's the interface? can I call anything I want and in any order?
+* **dependency problem**: are there external dependencies required for this code that I will need to include?
 </section>
 
 <section data-markdown>
-### Immediately-Invoked-Function-Expression
+### Solving the JS Namespace Issue
+#### Immediately-Invoked-Function-Expression
+
 ```js
 (function() {
 	// code	
@@ -84,11 +86,11 @@ function dylanChillingAndGrilling() {
 	// namespace'd code
 })();
 ```
-* declare a function that calls itself
+#### a function that calls itself
 </section>
 
 <section data-markdown>
-### Basic JS Module
+### IIFE as a Basic JS Module
 ```js
 var Module = (function() {
 	var privateMethod = function() {};
@@ -110,7 +112,8 @@ clientCode.publicMethod();
 </section>
 
 <section data-markdown>
-### Two 'Main Stream' Responses to JS Modules
+### Solving the Dependency Issue
+#### Two Popular Standards
 * AMD (Asynchronous Module Definition)
 * CommonJS
 </section>
@@ -121,13 +124,16 @@ clientCode.publicMethod();
 * Define a module
 
 ```js
-define('myModule', /* module name */
-  ['foo', 'bar'],  /* dependencies */
+define('myModule',     /* module name */
+  ['foo', 'bar'],      /* dependencies */
   function(foo, bar) { /* module definition */
-  	function fooTheBar() { /* use foo and bar all you want */ }
-	  return {
-	  	myModuleAwesomeMethod: fooTheBar
-	  }
+    function fooTheBar() { 
+      /* use foo and bar all you want */ 
+    }
+
+    return {
+      'myModuleAwesomeMethod': fooTheBar
+    }
   }
 );
 ```
@@ -164,16 +170,19 @@ var $ = require('jquery');
 $('.cssClass').append(myModule.myModuleAwesomeMethod());
 ```
 </section>
+
 <section data-markdown>
 ### Node.js-Flavored CommonJS
 * `module.exports` instead of just `exports`
+* relative module `require`ing in addition to `PATH`-like resolution
 
 ```js
 /* foo.js and bar.js modules in relative directories */
 var foo = require('./foo');
 var bar = require('../lib/bar');
 
-// jquery module in 'node_modules' directory
+/* looks for jquery module in a ./node_modules directory and
+   up (../node_modules, ../../node_modules, etc.) */
 var $ = require('jquery');
 
 function fooTheBar() { 
@@ -185,6 +194,82 @@ module.exports = {
 	'myModuleAwesomeMethod': fooTheBar
 };
 ```
+</section>
+<section data-markdown>
+### Options for Introducing Modules
+* DIY
+    * Pros: most likely simpler short-term
+    * Cons: might only provide namespace separation, with no dependency resolution
+* [RequireJS](http://requirejs.org/) - JavaScript file and (AMD) module loader
+    * Pros: simply add a js file and start writing AMD modules
+    * Cons: AMD seems clunky and verbose
+* [WebPack](https://github.com/webpack/webpack)
+    * Pros: bundles both CommonJS and AMD modules; bundles more than js files
+    * Cons: With great power, comes great learning curve
+* [Browserify](http://browserify.org/)...
+</section>
+<section data-markdown>
+### Enter Browserify
+> Browserify lets you 
+
+> `require('modules')` 
+
+> in the browser by bundling up all of your dependencies.
+</section>
+<section data-markdown>
+### Browserify'ing
+
+```js
+// create main.js
+var unique = require('uniq');
+
+var data = [1, 2, 2, 3, 4, 5, 5, 5, 6];
+
+console.log(unique(data));
+```
+
+```bash
+# Install the `uniq` module to 'node_modules' directory with npm
+# (npm not required, but would be akin to use of Maven during
+# development)
+$ npm install uniq
+```
+
+```bash
+# Bundle up all the required modules starting at 
+# main.js into a single file called bundle.js
+$ browserify main.js -o bundle.js
+```
+
+```html
+&lt;!-- Add a single `&lt;script&gt;` tag into your html --&gt;
+&lt;script&gt; src="bundle.js"&gt;&lt;/script&gt;
+```
+</section>
+
+<section data-markdown>
+### What Would It Take to Browserify?
+* Install node.js, npm, and browserify on build server and development machines
+* At first: Come up with a list of functionality that would benefit from reuse (form field validation, table sorting, etc.)
+* Later: develop a plan for migrating bigger chunks of functionality into modules
+* Migrate some JavaScript into CommonJS modules
+* Add browserify calls into build script
+</section>
+
+<section data-markdown>
+### I'm Worried About...
+* Like Maven, doesn't NPM use the internet to resolve dependencies? Our build server shouldn't rely on the internet..
+    * You can simply download dependencies while developing and check them into source control (as can be done with Maven projects)
+* Will this require refactoring of the entire project?
+    * While refactoring will be required, functionality can be modularized in increments and doesn't need to happen all at once
+</section>
+
+<section data-markdown>
+### Conclusion
+* Better JS namespace'ing
+* JS Dependency Resolution
+* Reuseable chunks of JS code
+* Easily add and upgrade JS dependencies
 </section>
 
 </div>
